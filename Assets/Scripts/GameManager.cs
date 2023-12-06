@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     public GameObject spawner;
     public bool isGameStart;
     public ARRaycastManager raycastManager;
+    public ARPlaneManager planeManager;
     private List<ARRaycastHit> hits = new();
 
     public int score
@@ -74,6 +75,8 @@ public class GameManager : MonoBehaviour
 
                     Instantiate(gameBox,hitPose.position,hitPose.rotation);
                     StartGame();
+                    planeManager.SetTrackablesActive(false);
+                    planeManager.enabled = false;
                 }
             }
         }
