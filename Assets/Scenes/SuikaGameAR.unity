@@ -1599,6 +1599,7 @@ MonoBehaviour:
   spawner: {fileID: 48666809}
   isGameStart: 0
   raycastManager: {fileID: 600401923}
+  planeManager: {fileID: 600401924}
 --- !u!1 &1269147609
 GameObject:
   m_ObjectHideFlags: 0
