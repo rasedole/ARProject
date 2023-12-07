@@ -13,5 +13,6 @@ public class FruitObject : MonoBehaviour
         {
             GameManager.Instance.CombineFruit(this.gameObject, collision.gameObject);
         }
+        deadCheck = true;
     }
 }

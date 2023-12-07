@@ -11,12 +11,11 @@ public class DeadLine : MonoBehaviour
             GameManager.Instance.GameEnd();
         }
     }
-
-    private void OnTriggerExit(Collider other)
+    private void OnCollisionStay(Collision other)
     {
-        if (other.gameObject.tag == "Fruits" && other.gameObject.GetComponent<FruitObject>().deadCheck == false)
+        if (other.gameObject.tag == "Fruits" && other.gameObject.GetComponent<FruitObject>().deadCheck)
         {
-            other.gameObject.GetComponent<FruitObject>().deadCheck = true;
+            GameManager.Instance.GameEnd();
         }
     }
 }

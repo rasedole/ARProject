@@ -16,11 +16,11 @@ public class FruitSpawner : MonoBehaviour
     private void OnEnable()
     {
         initPos = transform.position;
-        maxDis.Add(0.58f);
-        maxDis.Add(0.6f);
-        maxDis.Add(0.575f);
-        maxDis.Add(0.53f);
-        for(int i = 0; i < gameStartObject.Length; i++)
+        maxDis.Add(0.5f / 2);
+        maxDis.Add(0.51f / 2);
+        maxDis.Add(0.515f / 2);
+        maxDis.Add(0.47f / 2);
+        for (int i = 0; i < gameStartObject.Length; i++)
         {
             gameStartObject[i].SetActive(true);
         }
@@ -29,8 +29,11 @@ public class FruitSpawner : MonoBehaviour
 
     private void FixedUpdate()
     {
-        transform.position += new Vector3(joystick.Horizontal * Time.deltaTime, 0, joystick.Vertical * Time.deltaTime);
-        transform.position = new Vector3(Mathf.Clamp(transform.position.x, -distance, distance), transform.position.y, Mathf.Clamp(transform.position.z, -distance, distance));
+        Vector3 xMove = joystick.Vertical * Time.deltaTime * (Camera.main.transform.localRotation * Vector3.forward);
+        Vector3 zMove = joystick.Horizontal * Time.deltaTime * (Camera.main.transform.localRotation * Vector3.right);
+        //transform.position += new Vector3(joystick.Horizontal * Time.deltaTime, 0, joystick.Vertical * Time.deltaTime);
+        transform.position += xMove += zMove;
+        transform.position = new Vector3(Mathf.Clamp(transform.position.x, initPos.x - distance, initPos.x + distance), initPos.y, Mathf.Clamp(transform.position.z, initPos.z - distance, initPos.z + distance));
         if (currentFruit != null)
         {
             currentFruit.transform.position = transform.position;
@@ -39,23 +42,29 @@ public class FruitSpawner : MonoBehaviour
 
     public void FruitSpawn()
     {
-        int randomNum = Random.Range(0, 4);
-        distance = maxDis[randomNum];
-        currentFruit = Instantiate(GameManager.Instance.fruitList[randomNum]);
-        body = currentFruit.GetComponent<Rigidbody>();
+        if (GameManager.Instance.isGameEnd == false)
+        {
+            int randomNum = Random.Range(0, 4);
+            distance = maxDis[randomNum];
+            currentFruit = Instantiate(GameManager.Instance.fruitList[randomNum], transform.position, Quaternion.identity);
+            body = currentFruit.GetComponent<Rigidbody>();
+        }
     }
 
     public void FruitDown()
     {
-        if (dirtyCheck == false)
+        if (GameManager.Instance.isGameEnd == false)
         {
-            dirtyCheck = true;
-            body.useGravity = true;
-            currentFruit = null;
-            body = null;
-            transform.position = initPos;
-            Invoke("FruitSpawn", 1f);
-            Invoke("DirtyClear", 3f);
+            if (dirtyCheck == false)
+            {
+                dirtyCheck = true;
+                body.useGravity = true;
+                currentFruit = null;
+                body = null;
+                transform.position = initPos;
+                Invoke("FruitSpawn", 1f);
+                Invoke("DirtyClear", 1f);
+            }
         }
     }
 

@@ -28,6 +28,11 @@ public class GameManager : MonoBehaviour
     public bool isGameStart;
     public ARRaycastManager raycastManager;
     public ARPlaneManager planeManager;
+    public Dictionary<int, int> scoreTable = new();
+    public bool isGameEnd;
+    public GameObject gameOverUI;
+    public TMP_Text gameOverText;
+    public ParticleSystem particle;
     private List<ARRaycastHit> hits = new();
 
     public int score
@@ -60,23 +65,37 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         score = 0;
+        scoreTable.Add(0, 1);
+        scoreTable.Add(1,3);
+        scoreTable.Add(2,6);
+        scoreTable.Add(3,10);
+        scoreTable.Add(4,15);
+        scoreTable.Add(5,25);
+        scoreTable.Add(6,33);
+        scoreTable.Add(7,40);
+        scoreTable.Add(8,55);
+        scoreTable.Add(9,66);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (Input.touchCount > 0)
         {
-            if(Input.GetTouch(0).phase == TouchPhase.Began)
+            if (Input.GetTouch(0).phase == TouchPhase.Began)
             {
                 Vector2 touchPos = Input.GetTouch(0).position;
-                if(raycastManager.Raycast(touchPos,hits, TrackableType.PlaneWithinPolygon))
+                if (raycastManager.Raycast(touchPos, hits, TrackableType.PlaneWithinPolygon))
                 {
                     Pose hitPose = hits[0].pose;
-
-                    Instantiate(gameBox,hitPose.position,hitPose.rotation);
-                    StartGame();
-                    planeManager.SetTrackablesActive(false);
-                    planeManager.enabled = false;
+                    if (isGameStart == false)
+                    {
+                        gameBox.transform.position = hitPose.position;
+                        gameBox.transform.rotation = hitPose.rotation;
+                        gameBox.SetActive(true);
+                        StartGame();
+                        planeManager.SetTrackablesActive(false);
+                        planeManager.enabled = false;
+                    }
                 }
             }
         }
@@ -86,7 +105,7 @@ public class GameManager : MonoBehaviour
     {
         if (isGameStart == false)
         {
-            spawner.transform.position = gameBox.transform.position + new Vector3(0,2.3f,0);
+            spawner.transform.position = gameBox.transform.position + new Vector3(0, 1.15f, 0);
             spawner.SetActive(true);
             isGameStart = true;
         }
@@ -100,10 +119,12 @@ public class GameManager : MonoBehaviour
             int fruitNum = fruit1.GetComponent<FruitObject>().fruitNum;
             if (fruitNum < 9)
             {
-
+                score += scoreTable[fruitNum];
                 GameObject newFruit = Instantiate(fruitList[fruitNum + 1], (fruit1.transform.position + fruit2.transform.position) / 2, Quaternion.identity);
                 newFruit.GetComponent<Rigidbody>().angularVelocity = fruit1.GetComponent<Rigidbody>().angularVelocity + fruit2.GetComponent<Rigidbody>().angularVelocity;
                 newFruit.GetComponent<Rigidbody>().useGravity = true;
+                ParticleSystem temp = Instantiate(particle,newFruit.transform.position, Quaternion.identity);
+                //temp.transform.position = newFruit.transform.position;
             }
             fruitBucket.RemoveAt(newIndex);
             Destroy(fruit1);
@@ -131,6 +152,15 @@ public class GameManager : MonoBehaviour
 
     public void GameEnd()
     {
-        Debug.Log("GameEnd");
+        isGameEnd = true;
+        gameOverUI.SetActive(true);
+        gameOverText.text = "Game Over\n" + "Score : " + score;
+        gameOverText.color = Color.red;
+        Time.timeScale = 0;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }
